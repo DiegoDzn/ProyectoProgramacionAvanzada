@@ -1,15 +1,108 @@
-# Este es el archivo que se deeria de ejecutar para ejecutar todo el programa
-# 1. Importas la clase desde el otro archivo
-from usuario import Usuario 
+import time
+from models.incident import Incident
+from models.center import EmergencyCenter
+from structures.hash_table import HashTable
 
-# 2. Defines la función principal
+
+def mostrar_estadisticas_tabla(tabla: HashTable, titulo: str):
+    """Muestra de manera formateada las estadísticas de la HashTable."""
+    stats = tabla.get_stats()
+    print("-" * 50)
+    print(f" METRICAS DE LA TABLA HASH: {titulo}")
+    print("-" * 50)
+    print(f" Capacidad de la Tabla (M)  : {stats['capacity']}")
+    print(f" Elementos Almacenados (N) : {stats['size']}")
+    print(f" Factor de Carga (N/M)     : {stats['load_factor']:.4f}")
+    print(f" Total de Colisiones       : {stats['collisions']}")
+    print(f" Buckets Utilizados        : {stats['buckets_used']}")
+    print(f" Tamaño Máximo de Bucket   : {stats['max_bucket_size']}")
+    print("-" * 50)
+    print()
+
+
 def main():
-    print("Iniciando el programa...")
-    
-    # 3. Usas las clases del otro archivo
-    persona = Usuario("Carlos")
-    persona.saludar()
+    print("=" * 60)
+    print("   SISTEMA INTELIGENTE DE GESTIÓN DE EMERGENCIAS (Fase 1)")
+    print("=" * 60)
+    print()
 
-# 4. El disparador obligatorio de Python
+    # 1. Inicialización de Centros de Emergencia (ADTs)
+    print("[1] Inicializando Centros de Emergencia...")
+    centro_norte = EmergencyCenter("EC-01", "Centro de Emergencia Norte", "Interseccion_A")
+    centro_sur = EmergencyCenter("EC-02", "Centro de Emergencia Sur", "Interseccion_F")
+    print(f"  -> Creado: {centro_norte}")
+    print(f"  -> Creado: {centro_sur}")
+    print()
+
+    # 2. Inicialización de la HashTable para Incidentes
+    # Elegimos una capacidad pequeña para observar colisiones de forma controlada
+    print("[2] Creando Tabla Hash propia para Incidentes...")
+    tabla_incidentes = HashTable(initial_capacity=13)
+    mostrar_estadisticas_tabla(tabla_incidentes, "Inicial")
+
+    # 3. Creación e Inserción de Incidentes de Prueba
+    print("[3] Creando e insertando Incidentes en la Tabla Hash...")
+    incidentes_demo = [
+        Incident("I-152", "Zona_1", 8.5, "Incendio", time.time()),
+        Incident("I-102", "Zona_2", 3.0, "Accidente Vial", time.time()),
+        Incident("I-305", "Zona_1", 9.2, "Emergencia Medica", time.time()),
+        Incident("I-204", "Zona_3", 5.5, "Derrumbe", time.time()),
+        Incident("I-110", "Zona_2", 2.1, "Inundacion", time.time()),
+        Incident("I-099", "Zona_4", 7.0, "Incendio", time.time()),
+        Incident("I-180", "Zona_1", 4.0, "Accidente Vial", time.time()),
+        Incident("I-210", "Zona_3", 6.8, "Rescate", time.time()),
+        Incident("I-412", "Zona_4", 9.9, "Emergencia Medica", time.time()),
+        Incident("I-050", "Zona_2", 1.5, "Fuga de Gas", time.time()),
+    ]
+
+    for inc in incidentes_demo:
+        tabla_incidentes.insert(inc.id, inc)
+        print(f"  + Insertado: {inc}")
+
+    print()
+    mostrar_estadisticas_tabla(tabla_incidentes, "Lote Inicial Insertado")
+
+    # 4. Búsqueda y Actualización de un Incidente
+    print("[4] Buscando y actualizando incidentes...")
+    try:
+        id_busqueda = "I-152"
+        incidente_recuperado: Incident = tabla_incidentes.get(id_busqueda)
+        print(f"  -> Encontrado: {incidente_recuperado}")
+        
+        print(f"  * Actualizando estado del incidente {id_busqueda} a 'En Proceso'...")
+        incidente_recuperado.actualizar_estado("En Proceso")
+        
+        # Verificar que el cambio se refleja al volver a buscar
+        incidente_verificar = tabla_incidentes.get(id_busqueda)
+        print(f"  -> Estado actualizado en la tabla: {incidente_verificar}")
+    except KeyError as e:
+        print(f"  Error: {e}")
+    print()
+
+    # 5. Demostración de Eliminación
+    id_eliminar = "I-110"
+    print(f"[5] Eliminando incidente {id_eliminar}...")
+    if id_eliminar in tabla_incidentes:
+        tabla_incidentes.delete(id_eliminar)
+        print(f"  - Incidente {id_eliminar} eliminado con éxito.")
+        print(f"  - ¿Existe en la tabla?: {id_eliminar in tabla_incidentes}")
+    else:
+        print(f"  El incidente {id_eliminar} no existe.")
+
+    print()
+    mostrar_estadisticas_tabla(tabla_incidentes, "Post-Eliminación")
+
+    # 6. Demostración de Redimensionamiento Automático (Rehash)
+    # Insertaremos más incidentes para sobrepasar el factor de carga de 0.75
+    # Capacidad actual es 13 (primo inicial). El rehash ocurre cuando load_factor > 0.75 (N > 9)
+    # Actualmente tenemos 9 elementos. Insertar uno más forzará el rehash.
+    print("[6] Forzando el redimensionamiento dinámico (Rehash)...")
+    incidente_rehash = Incident("I-999", "Zona_Especial", 10.0, "Explosion", time.time())
+    print(f"  * Insertando incidente adicional: {incidente_rehash}")
+    tabla_incidentes.insert(incidente_rehash.id, incidente_rehash)
+
+    mostrar_estadisticas_tabla(tabla_incidentes, "Post-Rehash")
+
+
 if __name__ == '__main__':
     main()
