@@ -3,6 +3,7 @@ from models.incident import Incident
 from models.center import EmergencyCenter
 from models.road_network import RoadNetwork
 from structures.hash_table import HashTable
+from structures.priority_queue import PriorityQueue
 
 
 def mostrar_estadisticas_tabla(tabla: HashTable, titulo: str):
@@ -129,6 +130,44 @@ def main():
     tabla_incidentes.insert(incidente_rehash.id, incidente_rehash)
 
     mostrar_estadisticas_tabla(tabla_incidentes, "Post-Rehash")
+
+    # 8. Demostración de Cola de Prioridad y Heap (Parte 3)
+    print("[8] Inicializando Cola de Prioridad (PriorityQueue) y poblando con incidentes...")
+    cola_prioridad = PriorityQueue()
+    
+    # Insertar los incidentes activos en la cola de prioridad (excluyendo el eliminado)
+    for inc in incidentes_demo:
+        if inc.id != "I-110":
+            cola_prioridad.insertar(inc)
+    cola_prioridad.insertar(incidente_rehash)
+    
+    print(f"  -> Cola de prioridad poblada con {len(cola_prioridad)} incidentes.")
+    print()
+    
+    # Mostrar Top-3 incidentes críticos
+    print("  * Consultando el Top-3 de incidentes críticos en la cola:")
+    top_3 = cola_prioridad.obtener_top_k(3)
+    for i, inc in enumerate(top_3, 1):
+        print(f"    {i}. {inc}")
+    print()
+
+    # Actualizar prioridad en O(log N)
+    id_actualizar = "I-102"  # Originalmente prioridad 3.0
+    print(f"  * Actualizando la prioridad del incidente {id_actualizar} de 3.0 a 12.0 (máxima urgencia)...")
+    cola_prioridad.actualizar_prioridad(id_actualizar, 12.0)
+    
+    # Volver a consultar Top-3 para ver si cambió
+    print("  * Consultando nuevamente el Top-3 de incidentes críticos:")
+    top_3_nuevo = cola_prioridad.obtener_top_k(3)
+    for i, inc in enumerate(top_3_nuevo, 1):
+        print(f"    {i}. {inc}")
+    print()
+    
+    # Extraer el incidente más urgente
+    urgente = cola_prioridad.extraer_urgente()
+    print(f"  -> Incidente extraído (más urgente): {urgente}")
+    print(f"  -> Tamaño actual de la cola de prioridad: {len(cola_prioridad)}")
+    print()
 
 
 if __name__ == '__main__':

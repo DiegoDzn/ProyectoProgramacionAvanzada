@@ -98,5 +98,36 @@ class TestRoadNetwork(unittest.TestCase):
         with self.assertRaises(ValueError):
             net.obtener_adyacentes("Nodo_Inexistente")
 
+    def test_disjoint_network_and_updates(self):
+        """Prueba de grafos desconectados, actualización de pesos y aristas inexistentes."""
+        net = RoadNetwork()
+        net.agregar_nodo("Nodo_A")
+        net.agregar_nodo("Nodo_B")
+        net.agregar_nodo("Nodo_C")
+        net.agregar_nodo("Nodo_D")
+
+        # Conectar A-B
+        net.agregar_arista("Nodo_A", "Nodo_B", 10.0, bidireccional=True)
+        # Conectar C-D (Desconectado de A-B)
+        net.agregar_arista("Nodo_C", "Nodo_D", 5.0, bidireccional=True)
+
+        self.assertTrue(net.existe_arista("Nodo_A", "Nodo_B"))
+        self.assertTrue(net.existe_arista("Nodo_C", "Nodo_D"))
+        self.assertFalse(net.existe_arista("Nodo_A", "Nodo_C")) # Desconectados
+
+        # Actualizar peso de arista existente
+        net.agregar_arista("Nodo_A", "Nodo_B", 15.5, bidireccional=True)
+        self.assertEqual(net.obtener_peso("Nodo_A", "Nodo_B"), 15.5)
+        self.assertEqual(net.obtener_peso("Nodo_B", "Nodo_A"), 15.5)
+
+        # Buscar peso de arista que no existe entre nodos existentes
+        with self.assertRaises(ValueError):
+            net.obtener_peso("Nodo_A", "Nodo_C")
+
+        # Verificar representación del Grafo en cadena
+        repr_str = str(net)
+        self.assertIn("Red Vial (RoadNetwork):", repr_str)
+        self.assertIn("Nodo_A", repr_str)
+
 if __name__ == "__main__":
     unittest.main()
