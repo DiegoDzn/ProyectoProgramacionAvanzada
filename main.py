@@ -1,6 +1,7 @@
 import time
 from models.incident import Incident
 from models.center import EmergencyCenter
+from models.road_network import RoadNetwork
 from structures.hash_table import HashTable
 
 
@@ -26,22 +27,48 @@ def main():
     print("=" * 60)
     print()
 
-    # 1. Inicialización de Centros de Emergencia (ADTs)
-    print("[1] Inicializando Centros de Emergencia...")
+    # 1. Inicialización de la Red Vial (ADT RoadNetwork - Completa la Parte 1)
+    print("[1] Inicializando la Red Vial (RoadNetwork)...")
+    red_vial = RoadNetwork()
+    
+    # Agregar nodos (intersecciones y zonas)
+    nodos_sistema = [
+        "Interseccion_A", "Interseccion_B", "Interseccion_C", 
+        "Interseccion_D", "Interseccion_E", "Interseccion_F", 
+        "Zona_1", "Zona_2", "Zona_3", "Zona_4"
+    ]
+    for nodo in nodos_sistema:
+        red_vial.agregar_nodo(nodo)
+        
+    # Agregar aristas con pesos (tiempos de desplazamiento en minutos)
+    red_vial.agregar_arista("Interseccion_A", "Zona_1", 10.0, bidireccional=True)
+    red_vial.agregar_arista("Interseccion_A", "Zona_2", 15.0, bidireccional=True)
+    red_vial.agregar_arista("Zona_1", "Zona_3", 5.0, bidireccional=True)
+    red_vial.agregar_arista("Zona_2", "Interseccion_C", 8.0, bidireccional=True)
+    red_vial.agregar_arista("Interseccion_C", "Zona_4", 12.0, bidireccional=True)
+    red_vial.agregar_arista("Zona_3", "Interseccion_F", 7.0, bidireccional=True)
+    red_vial.agregar_arista("Zona_4", "Interseccion_F", 4.0, bidireccional=True)
+    
+    print("  -> Red Vial creada exitosamente:")
+    print(red_vial)
+    print()
+
+    # 2. Inicialización de Centros de Emergencia (ADTs)
+    print("[2] Inicializando Centros de Emergencia...")
     centro_norte = EmergencyCenter("EC-01", "Centro de Emergencia Norte", "Interseccion_A")
     centro_sur = EmergencyCenter("EC-02", "Centro de Emergencia Sur", "Interseccion_F")
     print(f"  -> Creado: {centro_norte}")
     print(f"  -> Creado: {centro_sur}")
     print()
 
-    # 2. Inicialización de la HashTable para Incidentes
+    # 3. Inicialización de la HashTable para Incidentes (Parte 2)
     # Elegimos una capacidad pequeña para observar colisiones de forma controlada
-    print("[2] Creando Tabla Hash propia para Incidentes...")
+    print("[3] Creando Tabla Hash propia para Incidentes...")
     tabla_incidentes = HashTable(initial_capacity=13)
     mostrar_estadisticas_tabla(tabla_incidentes, "Inicial")
 
-    # 3. Creación e Inserción de Incidentes de Prueba
-    print("[3] Creando e insertando Incidentes en la Tabla Hash...")
+    # 4. Creación e Inserción de Incidentes de Prueba (Parte 2)
+    print("[4] Creando e insertando Incidentes en la Tabla Hash...")
     incidentes_demo = [
         Incident("I-152", "Zona_1", 8.5, "Incendio", time.time()),
         Incident("I-102", "Zona_2", 3.0, "Accidente Vial", time.time()),
@@ -62,8 +89,8 @@ def main():
     print()
     mostrar_estadisticas_tabla(tabla_incidentes, "Lote Inicial Insertado")
 
-    # 4. Búsqueda y Actualización de un Incidente
-    print("[4] Buscando y actualizando incidentes...")
+    # 5. Búsqueda y Actualización de un Incidente (Parte 2)
+    print("[5] Buscando y actualizando incidentes...")
     try:
         id_busqueda = "I-152"
         incidente_recuperado: Incident = tabla_incidentes.get(id_busqueda)
@@ -79,9 +106,9 @@ def main():
         print(f"  Error: {e}")
     print()
 
-    # 5. Demostración de Eliminación
+    # 6. Demostración de Eliminación (Parte 2)
     id_eliminar = "I-110"
-    print(f"[5] Eliminando incidente {id_eliminar}...")
+    print(f"[6] Eliminando incidente {id_eliminar}...")
     if id_eliminar in tabla_incidentes:
         tabla_incidentes.delete(id_eliminar)
         print(f"  - Incidente {id_eliminar} eliminado con éxito.")
@@ -92,11 +119,11 @@ def main():
     print()
     mostrar_estadisticas_tabla(tabla_incidentes, "Post-Eliminación")
 
-    # 6. Demostración de Redimensionamiento Automático (Rehash)
+    # 7. Demostración de Redimensionamiento Automático (Rehash) (Parte 2)
     # Insertaremos más incidentes para sobrepasar el factor de carga de 0.75
     # Capacidad actual es 13 (primo inicial). El rehash ocurre cuando load_factor > 0.75 (N > 9)
     # Actualmente tenemos 9 elementos. Insertar uno más forzará el rehash.
-    print("[6] Forzando el redimensionamiento dinámico (Rehash)...")
+    print("[7] Forzando el redimensionamiento dinámico (Rehash)...")
     incidente_rehash = Incident("I-999", "Zona_Especial", 10.0, "Explosion", time.time())
     print(f"  * Insertando incidente adicional: {incidente_rehash}")
     tabla_incidentes.insert(incidente_rehash.id, incidente_rehash)
