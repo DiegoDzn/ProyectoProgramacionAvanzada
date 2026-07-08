@@ -27,6 +27,8 @@ class RoadNetwork:
         """
         # Estructura interna: dict que asocia cada nodo con otro dict de {destino: peso}
         self._adjacency_list = {}
+        # Diccionario para almacenar coordenadas (x, y) de los nodos
+        self._coordinates = {}
 
     def agregar_nodo(self, nodo: str):
         """
@@ -179,3 +181,44 @@ class RoadNetwork:
             conexiones = ", ".join(f"-> {dest} ({peso:.1f})" for dest, peso in adyacentes.items())
             res.append(f"  {nodo}: [{conexiones}]" if conexiones else f"  {nodo}: [Sin conexiones]")
         return "\n".join(res)
+
+    def establecer_coordenadas(self, nodo: str, x: float, y: float):
+        """
+        Establece las coordenadas (x, y) de un nodo (O(1)).
+        
+        Precondición:
+            - El nodo debe existir en la red vial.
+        """
+        if not self.existe_nodo(nodo):
+            raise ValueError(f"El nodo '{nodo}' no existe en la red vial.")
+        self._coordinates[nodo.strip()] = (float(x), float(y))
+
+    def obtener_coordenadas(self, nodo: str) -> tuple:
+        """
+        Retorna las coordenadas (x, y) de un nodo (O(1)).
+        
+        Precondición:
+            - El nodo debe existir en la red vial y tener coordenadas asignadas.
+        """
+        nodo_limpio = nodo.strip()
+        if nodo_limpio not in self._coordinates:
+            raise KeyError(f"No se han definido coordenadas para el nodo '{nodo_limpio}'.")
+        return self._coordinates[nodo_limpio]
+
+    def cargar_desde_json(self, ruta_archivo: str):
+        """
+        Carga la red vial y sus coordenadas desde un archivo JSON.
+        
+        Precondición:
+            - El archivo JSON debe ser válido y estructurado.
+        """
+        import json
+        with open(ruta_archivo, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        
+        for n in data.get("nodos", []):
+            self.agregar_nodo(n["id"])
+            self.establecer_coordenadas(n["id"], n["x"], n["y"])
+            
+        for a in data.get("aristas", []):
+            self.agregar_arista(a["origen"], a["destino"], a["peso"], bidireccional=True)

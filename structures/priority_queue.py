@@ -201,3 +201,68 @@ class PriorityQueue:
             resultados.append(temp_pq.extraer_urgente())
 
         return resultados
+
+
+class MinPriorityQueue:
+    """
+    Cola de Prioridad genérica de Mínimos implementada mediante un Min-Heap binario.
+    Almacena elementos como tuplas (prioridad, item) y extrae el menor de forma eficiente en O(log N).
+    """
+
+    def __init__(self):
+        """Inicializa una cola de prioridad de mínimos vacía."""
+        self._heap = []
+
+    def __len__(self) -> int:
+        """Retorna la cantidad de elementos en la cola (O(1))."""
+        return len(self._heap)
+
+    def esta_vacia(self) -> bool:
+        """Verifica si la cola está vacía (O(1))."""
+        return len(self._heap) == 0
+
+    def insertar(self, prioridad, item):
+        """Inserta un par (prioridad, item) en la cola (O(log N))."""
+        self._heap.append((prioridad, item))
+        self._sift_up(len(self._heap) - 1)
+
+    def extraer_min(self) -> tuple:
+        """Remueve y retorna la tupla (prioridad, item) con menor prioridad (O(log N))."""
+        if self.esta_vacia():
+            raise IndexError("No se puede extraer de una cola de prioridad vacía.")
+        self._swap(0, len(self._heap) - 1)
+        removido = self._heap.pop()
+        if not self.esta_vacia():
+            self._sift_down(0)
+        return removido
+
+    def _swap(self, i: int, j: int):
+        """Intercambia dos elementos en el heap (O(1))."""
+        self._heap[i], self._heap[j] = self._heap[j], self._heap[i]
+
+    def _sift_up(self, idx: int):
+        """Desplaza un elemento hacia arriba en el heap (O(log N))."""
+        while idx > 0:
+            parent = (idx - 1) // 2
+            if self._heap[idx][0] < self._heap[parent][0]:
+                self._swap(idx, parent)
+                idx = parent
+            else:
+                break
+
+    def _sift_down(self, idx: int):
+        """Desplaza un elemento hacia abajo en el heap (O(log N))."""
+        n = len(self._heap)
+        while 2 * idx + 1 < n:
+            left = 2 * idx + 1
+            right = 2 * idx + 2
+            smallest = left
+
+            if right < n and self._heap[right][0] < self._heap[left][0]:
+                smallest = right
+
+            if self._heap[smallest][0] < self._heap[idx][0]:
+                self._swap(idx, smallest)
+                idx = smallest
+            else:
+                break

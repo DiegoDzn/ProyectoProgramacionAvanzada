@@ -1,9 +1,16 @@
 import time
+import random
+import os
+from data_generator import verificar_y_generar_datos
 from models.incident import Incident
 from models.center import EmergencyCenter
 from models.road_network import RoadNetwork
 from structures.hash_table import HashTable
 from structures.priority_queue import PriorityQueue
+from structures.sorting import merge_sort, quick_sort
+from structures.graph_search import bfs, dijkstra, a_star
+
+
 
 
 def mostrar_estadisticas_tabla(tabla: HashTable, titulo: str):
@@ -168,6 +175,182 @@ def main():
     print(f"  -> Incidente extraído (más urgente): {urgente}")
     print(f"  -> Tamaño actual de la cola de prioridad: {len(cola_prioridad)}")
     print()
+
+    # 9. Demostración de Ordenamiento y Reportes (Parte 4)
+    print("[9] Generando Reportes Ordenados mediante MergeSort y QuickSort...")
+    
+    # Recolectamos todos los incidentes activos (excluyendo el eliminado I-110)
+    incidentes_activos = [inc for inc in incidentes_demo if inc.id != "I-110"]
+    # Agregamos también el incidente de rehash
+    incidentes_activos.append(incidente_rehash)
+    
+    # Reporte A: Incidentes más antiguos (ordenados de forma ascendente por timestamp)
+    print("  * Reporte A: Incidentes más antiguos (MergeSort por timestamp - ascendente):")
+    reporte_antiguos = merge_sort(incidentes_activos, key=lambda x: x.timestamp)
+    for i, inc in enumerate(reporte_antiguos, 1):
+        print(f"    {i}. ID: {inc.id} | Tipo: {inc.tipo:<18} | Reportado: {time.strftime('%H:%M:%S', time.localtime(inc.timestamp))}")
+    print()
+    
+    # Reporte B: Incidentes más críticos (ordenados de forma descendente por prioridad)
+    print("  * Reporte B: Incidentes más críticos (QuickSort por prioridad - descendente):")
+    reporte_criticos = quick_sort(incidentes_activos, key=lambda x: x.prioridad, reverse=True)
+    for i, inc in enumerate(reporte_criticos, 1):
+        print(f"    {i}. ID: {inc.id} | Tipo: {inc.tipo:<18} | Prioridad: {inc.prioridad:.2f}")
+    print()
+    
+    # Reporte C: Zonas con más incidentes (ordenadas por frecuencia descendente)
+    print("  * Reporte C: Zonas con más incidentes (MergeSort por frecuencia - descendente):")
+    frecuencias = {}
+    for inc in incidentes_activos:
+        frecuencias[inc.ubicacion] = frecuencias.get(inc.ubicacion, 0) + 1
+    lista_frecuencias = list(frecuencias.items())
+    reporte_zonas = merge_sort(lista_frecuencias, key=lambda x: x[1], reverse=True)
+    for i, (zona, freq) in enumerate(reporte_zonas, 1):
+        print(f"    {i}. Zona: {zona:<15} | Incidentes reportados: {freq}")
+    print()
+
+    # 10. Análisis Experimental Comparativo (Parte 4)
+    print("[10] Iniciando Análisis Experimental de Algoritmos de Ordenamiento...")
+    ejecutar_benchmarks()
+    print()
+
+    # 11. Escenario Integrado (Parte 7)
+    print("[11] Iniciando Escenario Integrado de Emergencia...")
+    # Asegurar que existan los archivos de datos
+    verificar_y_generar_datos()
+    
+    # A. Carga de la Red Vial Completa (Parte 5)
+    print("  * Cargando Red Vial desde 'red_vial.json'...")
+    red_vial_completa = RoadNetwork()
+    red_vial_completa.cargar_desde_json("red_vial.json")
+    print(f"    -> Cargado: {len(red_vial_completa.obtener_nodos())} nodos y 121 aristas ponderadas con coordenadas.")
+    
+    # Inicialización de Centros de Emergencia en la Red Vial
+    centro_a_id, centro_a_nodo = "EC-01", "Nodo_0_0"  # Extremo Superior Izquierdo de la cuadrícula
+    centro_b_id, centro_b_nodo = "EC-02", "Nodo_4_9"  # Extremo Inferior Derecho de la cuadrícula
+    centro_a = EmergencyCenter(centro_a_id, "Centro de Emergencia Norte", centro_a_nodo)
+    centro_b = EmergencyCenter(centro_b_id, "Centro de Emergencia Sur", centro_b_nodo)
+    print(f"    -> Centros Operacionales: {centro_a} y {centro_b}")
+    
+    # B. Carga de Incidentes desde CSV (Parte 7)
+    print("  * Cargando 500 incidentes desde 'incidentes.csv'...")
+    tabla_completa = HashTable(initial_capacity=500)
+    cola_completa = PriorityQueue()
+    
+    with open("incidentes.csv", "r", encoding="utf-8") as f:
+        lineas = f.readlines()
+        
+    for line in lineas[1:]:  # Omitir cabecera
+        parts = line.strip().split(",")
+        if len(parts) >= 5:
+            inc_id = parts[0]
+            zona = parts[1]
+            prioridad = float(parts[2])
+            tipo = parts[3]
+            timestamp = float(parts[4])
+            inc = Incident(inc_id, zona, prioridad, tipo, timestamp)
+            
+            # Almacenar en ambas estructuras
+            tabla_completa.insert(inc_id, inc)
+            cola_completa.insertar(inc)
+            
+    print(f"    -> Tabla Hash: {tabla_completa.size} incidentes almacenados.")
+    print(f"    -> Cola de Prioridad: {len(cola_completa)} incidentes almacenados.")
+    
+    # C. Extraer el Incidente Más Urgente
+    urgente = cola_completa.extraer_urgente()
+    print(f"  -> Incidente extraído por urgencia: {urgente}")
+    
+    # D. Buscar la ruta óptima desde el centro de emergencia más cercano (Parte 7)
+    print(f"  * Buscando el Centro de Emergencia más cercano a la zona del incidente '{urgente.ubicacion}'...")
+    
+    # Calcular la ruta más rápida con Dijkstra desde ambos centros
+    res_centro_a = dijkstra(red_vial_completa, centro_a_nodo, urgente.ubicacion)
+    res_centro_b = dijkstra(red_vial_completa, centro_b_nodo, urgente.ubicacion)
+    
+    # Seleccionar el centro más cercano
+    if res_centro_a["costo"] <= res_centro_b["costo"]:
+        centro_seleccionado = centro_a
+        nodo_inicio = centro_a_nodo
+        ruta_op = res_centro_a
+        print(f"    -> Centro asignado: {centro_a.nombre} (Costo: {res_centro_a['costo']:.2f} min)")
+    else:
+        centro_seleccionado = centro_b
+        nodo_inicio = centro_b_nodo
+        ruta_op = res_centro_b
+        print(f"    -> Centro asignado: {centro_b.nombre} (Costo: {res_centro_b['costo']:.2f} min)")
+        
+    print(f"    -> Ruta sugerida: {' -> '.join(ruta_op['ruta'])}")
+    print(f"    -> Tiempo estimado de llegada: {ruta_op['costo']:.2f} minutos.")
+    print()
+
+    # E. Análisis Experimental de Algoritmos de Búsqueda (Parte 7)
+    print("  * Análisis Experimental de Algoritmos de Búsqueda (BFS vs Dijkstra vs A*):")
+    # Ejecutamos las tres búsquedas para el mismo par origen-destino
+    res_bfs = bfs(red_vial_completa, nodo_inicio, urgente.ubicacion)
+    res_dijkstra = dijkstra(red_vial_completa, nodo_inicio, urgente.ubicacion)
+    res_astar = a_star(red_vial_completa, nodo_inicio, urgente.ubicacion)
+    
+    print("-" * 75)
+    print(f"{'Algoritmo':<15} | {'Nodos Visitados':<18} | {'Costo Total (min)':<18} | {'Cantidad de Hops':<12}")
+    print("-" * 75)
+    print(f"{'BFS':<15} | {len(res_bfs['visitados']):<18} | {res_bfs['costo']:<18} | {len(res_bfs['ruta']) - 1:<12}")
+    print(f"{'Dijkstra':<15} | {len(res_dijkstra['visitados']):<18} | {res_dijkstra['costo']:<18} | {len(res_dijkstra['ruta']) - 1:<12}")
+    print(f"{'A* (Euc.)':<15} | {len(res_astar['visitados']):<18} | {res_astar['costo']:<18} | {len(res_astar['ruta']) - 1:<12}")
+    print("-" * 75)
+    print()
+    print("  [Interpretación]:")
+    print("  - BFS encuentra la ruta con menor número de hops, pero ignora el tiempo real (costo).")
+    print("  - Dijkstra garantiza el menor tiempo real de viaje, pero explora un espacio de búsqueda grande.")
+    print("  - A* utiliza la heurística de distancia para guiar el camino de forma óptima, logrando")
+    print("    el mismo tiempo de llegada de Dijkstra pero visitando significativamente menos nodos.")
+    print()
+    print("Fase de demostraciones completada con éxito.")
+    print()
+
+
+
+def ejecutar_benchmarks():
+    """Ejecuta una serie de experimentos comparativos entre MergeSort y QuickSort."""
+    print("-" * 75)
+    print(f"{'Tamaño (N)':<12} | {'Caso':<15} | {'MergeSort (s)':<18} | {'QuickSort (s)':<18}")
+    print("-" * 75)
+    
+    tamanos = [100, 500, 1000]
+    # Usar semilla para reproducibilidad
+    random.seed(42)
+    
+    for N in tamanos:
+        for caso in ["Aleatorio", "Ordenado", "Inverso"]:
+            if caso == "Aleatorio":
+                data = [random.randint(1, 100000) for _ in range(N)]
+            elif caso == "Ordenado":
+                data = list(range(N))
+            else:
+                data = list(range(N, 0, -1))
+            
+            # Benchmark MergeSort
+            t_merge_acum = 0.0
+            for _ in range(3): # Promedio de 3 corridas
+                data_copy = list(data)
+                inicio = time.perf_counter()
+                merge_sort(data_copy)
+                t_merge_acum += (time.perf_counter() - inicio)
+            t_merge_prom = t_merge_acum / 3.0
+            
+            # Benchmark QuickSort
+            t_quick_acum = 0.0
+            for _ in range(3): # Promedio de 3 corridas
+                data_copy = list(data)
+                inicio = time.perf_counter()
+                quick_sort(data_copy)
+                t_quick_acum += (time.perf_counter() - inicio)
+            t_quick_prom = t_quick_acum / 3.0
+            
+            print(f"{N:<12} | {caso:<15} | {t_merge_prom:16.6f}s | {t_quick_prom:16.6f}s")
+    print("-" * 75)
+    print()
+
 
 
 if __name__ == '__main__':
