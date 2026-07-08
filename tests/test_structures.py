@@ -59,6 +59,23 @@ class TestADTs(unittest.TestCase):
         with self.assertRaises(ValueError):
             EmergencyCenter("C-01", "", "Zona_Centro")
 
+    def test_incident_string_representation(self):
+        inc = Incident("I-101", "Zona_A", 4.5, "Incendio", 1625097600.0)
+        self.assertIn("I-101", str(inc))
+        self.assertIn("Incendio", str(inc))
+        self.assertIn("Incident(id='I-101'", repr(inc))
+
+    def test_emergency_center_string_representation(self):
+        center = EmergencyCenter("C-01", "Hospital Central", "Zona_Centro")
+        self.assertIn("C-01", str(center))
+        self.assertIn("Hospital Central", str(center))
+        self.assertIn("EmergencyCenter(id='C-01'", repr(center))
+        
+        # Validación de tipo en setters y valores inválidos
+        with self.assertRaises(ValueError):
+            inc = Incident("I-101", "Zona_A", 4.5, "Incendio", 1625097600.0)
+            inc.prioridad = "alta"  # tipo inválido para prioridad
+
 
 class TestHashTable(unittest.TestCase):
     """Pruebas unitarias para la HashTable propia."""
@@ -167,6 +184,37 @@ class TestHashTable(unittest.TestCase):
         self.assertEqual(stats["collisions"], computed_collisions)
         self.assertEqual(stats["buckets_used"], buckets_used)
         self.assertEqual(stats["max_bucket_size"], max_bucket_size)
+
+    def test_massive_insertion_and_rehashing(self):
+        """Prueba de inserción de gran volumen de datos para estresar el rehashing."""
+        ht = HashTable(initial_capacity=11)
+        # Insertar 200 elementos
+        for i in range(200):
+            ht.insert(f"Key-{i}", f"Value-{i}")
+        
+        # Verificar tamaño y que todos los elementos existan
+        self.assertEqual(ht.size, 200)
+        for i in range(200):
+            self.assertEqual(ht.get(f"Key-{i}"), f"Value-{i}")
+        
+        # La capacidad debe haber crecido significativamente
+        self.assertTrue(ht.capacity > 11)
+        self.assertTrue(ht.load_factor <= 0.75)
+
+    def test_collision_chain_deletion(self):
+        """Fuerza colisiones en un mismo bucket, elimina del medio y verifica integridad."""
+        ht = HashTable(initial_capacity=31)
+        claves = [f"Item-{x}" for x in range(15)]
+        for k in claves:
+            ht.insert(k, f"Val-{k}")
+            
+        # Vamos a forzar la eliminación de todas las claves una por una
+        for k in claves:
+            self.assertTrue(k in ht)
+            ht.delete(k)
+            self.assertFalse(k in ht)
+        
+        self.assertEqual(ht.size, 0)
 
 
 if __name__ == "__main__":

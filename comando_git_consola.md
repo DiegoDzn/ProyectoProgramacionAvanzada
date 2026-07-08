@@ -20,7 +20,13 @@ git push origin --delete develop
 git branch -d develop
 ```
 
-## Forzar el borrado de la rama en local
+## Forzar el borrar la rama en local
 ```bash
 git branch -D develop
 ```
+
+## Agregar la nueva rama que ya esta en local a la web
+```bash
+git push -u origin develop
+```
+
