@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Dispatch & Routing Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css?v=3">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Panel Izquierdo: Controles y Reportes -->
+        <aside class="side-panel left-panel">
+            <div class="panel-header">
+                <h2>CENTRO DE CONTROL</h2>
+                <span class="status-indicator">ONLINE</span>
+            </div>
+            
+            <div class="control-group">
+                <button id="btn-dispatch" class="btn primary-btn">Simular Despacho en Vivo</button>
+                <button id="btn-reports" class="btn secondary-btn">Generar Reportes Internos</button>
+            </div>
+
+            <div class="panel-section">
+                <h3>ALERTAS RECIENTES</h3>
+                <div id="incident-alerts-list" class="alert-list">
+                    <p class="empty-text">Sin alertas procesadas en esta sesion.</p>
+                </div>
+            </div>
+
+            <div class="panel-section overflow-section">
+                <h3>REPORTES ORDENADOS</h3>
+                <div class="tab-controls">
+                    <button class="tab-btn active" data-tab="tab-criticos">Criticos</button>
+                    <button class="tab-btn" data-tab="tab-antiguos">Antiguos</button>
+                </div>
+                <div class="tab-content active" id="tab-criticos">
+                    <div id="list-criticos" class="report-list">
+                        <p class="empty-text">Presione "Generar Reportes" para ver datos.</p>
+                    </div>
+                </div>
+                <div class="tab-content" id="tab-antiguos">
+                    <div id="list-antiguos" class="report-list">
+                        <p class="empty-text">Presione "Generar Reportes" para ver datos.</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Panel Central: Mapa SVG de la Red Vial -->
+        <main class="main-map-panel">
+            <div class="map-header">
+                <div class="title-area">
+                    <h1>RED VIAL GENERAL</h1>
+                    <p>Monitoreo Distrital de 50 Nodos y 121 Conexiones Activas</p>
+                </div>
+                <div class="telemetry-compact">
+                    <div class="telemetry-box">
+                        <span class="label">ETA</span>
+                        <span id="tel-eta" class="value">-- min</span>
+                    </div>
+                    <div class="telemetry-box">
+                        <span class="label">DISTANCIA</span>
+                        <span id="tel-cost" class="value">-- min</span>
+                    </div>
+                </div>
+            </div>
+            <div class="svg-map-wrapper">
+                <svg id="svg-map" viewBox="0 0 100 50" preserveAspectRatio="xMidYMid meet">
+                    <!-- Las aristas, nodos y vehículos se dibujarán dinámicamente -->
+                </svg>
+                <div id="map-tooltip" class="tooltip hidden"></div>
+            </div>
+        </main>
+
+        <!-- Panel Derecho: Logs y Benchmarks -->
+        <aside class="side-panel right-panel">
+            <div class="panel-section logs-section">
+                <h3>TELEMETRIA Y LOGS DE DESPACHO</h3>
+                <div id="dispatch-logs" class="console-logs">
+                    <p class="log-info">[SYSTEM] Consola iniciada. Esperando simulacion...</p>
+                </div>
+            </div>
+
+            <div class="panel-section benchmarks-section">
+                <h3>ANALISIS COMPARATIVO DE ALGORITMOS</h3>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Algoritmo</th>
+                                <th>Nodos Visitados</th>
+                                <th>Tiempo (min)</th>
+                                <th>Hops</th>
+                            </tr>
+                        </thead>
+                        <tbody id="search-benchmarks-body">
+                            <tr>
+                                <td colspan="4" class="empty-table-text">Esperando simulación integrada...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="benchmarks-sorting">
+                    <h4>Benchmarks de Ordenamiento (N=1000)</h4>
+                    <div class="sorting-chart-container">
+                        <div class="chart-row">
+                            <span class="chart-label">MergeSort</span>
+                            <div class="chart-bar-wrapper">
+                                <div id="bar-mergesort" class="chart-bar" style="width: 0%"></div>
+                            </div>
+                            <span id="val-mergesort" class="chart-value">0.00s</span>
+                        </div>
+                        <div class="chart-row">
+                            <span class="chart-label">QuickSort</span>
+                            <div class="chart-bar-wrapper">
+                                <div id="bar-quicksort" class="chart-bar" style="width: 0%"></div>
+                            </div>
+                            <span id="val-quicksort" class="chart-value">0.00s</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+    
+    <script src="index.js?v=3"></script>
+</body>
+</html>
