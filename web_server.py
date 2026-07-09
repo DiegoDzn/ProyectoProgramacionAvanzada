@@ -90,6 +90,7 @@ class DashboardRequestHandler(http.server.BaseHTTPRequestHandler):
         
         tabla_completa = HashTable(initial_capacity=500)
         cola_completa = PriorityQueue()
+        incidentes_lista = []
         
         with open("incidentes.csv", "r", encoding="utf-8") as f:
             lineas = f.readlines()
@@ -105,12 +106,13 @@ class DashboardRequestHandler(http.server.BaseHTTPRequestHandler):
                 inc = Incident(inc_id, zona, prioridad, tipo, timestamp)
                 tabla_completa.insert(inc_id, inc)
                 cola_completa.insertar(inc)
+                incidentes_lista.append(inc)
                 
         logs.append(f"[DATABASE] Sincronizacion completa: {tabla_completa.size} incidentes listos.")
         logs.append(f"[SYSTEM] Monitoreando alertas entrantes...")
         
-        # Extraer
-        urgente = cola_completa.extraer_urgente()
+        # Seleccionar un incidente aleatorio para el despacho en vivo
+        urgente = random.choice(incidentes_lista)
         logs.append(f"[ALERT] ALERTA CRITICA DETECTADA: ID {urgente.id} | Tipo: {urgente.tipo} en {urgente.ubicacion} (Prioridad: {urgente.prioridad:.2f})")
         
         logs.append(f"[PROCESSING] Calculando rutas optimas desde bases operativas por Dijkstra...")
