@@ -9,6 +9,7 @@ from structures.hash_table import HashTable
 from structures.priority_queue import PriorityQueue
 from structures.sorting import merge_sort, quick_sort
 from structures.graph_search import bfs, dijkstra, a_star
+import web_server
 
 
 def limpiar_pantalla():
@@ -309,10 +310,11 @@ def main():
         print("  SISTEMA INTELIGENTE DE GESTION Y OPTIMIZACION DE RUTA (CLI)")
         print("==============================================================")
         print(" 1. Iniciar Simulacion y Analisis de Rendimiento del Sistema")
-        print(" 2. Salir")
+        print(" 2. Iniciar Servidor Web (Dashboard de Monitoreo)")
+        print(" 3. Salir")
         print("==============================================================")
         
-        opcion = input("Seleccione una opcion (1-2): ").strip()
+        opcion = input("Seleccione una opcion (1-3): ").strip()
         
         if opcion == "1":
             limpiar_pantalla()
@@ -322,6 +324,9 @@ def main():
             ejecutar_analisis_experimental()
             pausar()
         elif opcion == "2":
+            limpiar_pantalla()
+            web_server.iniciar_servidor(puerto=8000)
+        elif opcion == "3":
             limpiar_pantalla()
             print("\nCerrando programa operativo...")
             print("Cierre de conexion exitoso.\n")
