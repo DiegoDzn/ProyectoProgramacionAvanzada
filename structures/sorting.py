@@ -102,6 +102,36 @@ def _quick_sort_helper(arr: list, low: int, high: int, key, reverse: bool):
         _quick_sort_helper(arr, pivot_idx + 1, high, key, reverse)
 
 
+def zone_frequency_report(incidentes: list) -> list:
+    """
+    Genera un reporte de frecuencia de incidentes por zona/ubicacion.
+
+    Recorre la lista de incidentes, cuenta cuantos hay en cada zona
+    y retorna una lista de tuplas (zona, cantidad) ordenada por frecuencia
+    descendente usando MergeSort.
+
+    Complejidad:
+        - Tiempo: O(N + Z log Z) donde N es el numero de incidentes y Z el numero de zonas unicas.
+        - Espacio: O(Z) para el conteo de frecuencias.
+
+    Parametros:
+        incidentes (list): Lista de objetos Incident.
+
+    Retorna:
+        list: Lista de tuplas (zona, cantidad) ordenada por cantidad descendente.
+    """
+    frecuencias = {}
+    for inc in incidentes:
+        zona = inc.ubicacion
+        if zona in frecuencias:
+            frecuencias[zona] += 1
+        else:
+            frecuencias[zona] = 1
+
+    lista_frecuencias = [(zona, cant) for zona, cant in frecuencias.items()]
+    return merge_sort(lista_frecuencias, key=lambda x: x[1], reverse=True)
+
+
 def _partition(arr: list, low: int, high: int, key, reverse: bool) -> int:
     """Particiona el subarreglo y retorna el índice final del pivote."""
     # Selección de pivote: elemento medio para mitigar peor caso de pre-ordenado

@@ -266,3 +266,70 @@ class MinPriorityQueue:
                 idx = smallest
             else:
                 break
+
+
+def benchmark_priority_queue(tamanos=None, repeticiones=3):
+    """
+    Realiza benchmarks de insercion y extraccion sobre la PriorityQueue (Max-Heap).
+
+    Mide el tiempo promedio de insercion y extraccion para distintos volumenes de datos.
+
+    Complejidad del benchmark:
+        - Para cada tamano N, se realizan N inserciones y N extracciones.
+        - Tiempo total: O(sum(N_i * log(N_i) * repeticiones))
+
+    Parametros:
+        tamanos (list): Lista de tamanos de datos a probar. Por defecto [100, 500, 1000].
+        repeticiones (int): Numero de repeticiones para promediar. Por defecto 3.
+
+    Retorna:
+        dict: Diccionario con los resultados del benchmark.
+    """
+    import time as _time
+    import random as _random
+
+    if tamanos is None:
+        tamanos = [100, 500, 1000]
+
+    resultados = []
+
+    for N in tamanos:
+        tiempos_insercion = []
+        tiempos_extraccion = []
+
+        for _ in range(repeticiones):
+            pq = PriorityQueue()
+
+            lista_incidentes = []
+            for i in range(N):
+                inc = Incident(
+                    f"BH-{i}",
+                    f"Zona_{_random.randint(1, 50)}",
+                    _random.uniform(1.0, 20.0),
+                    "Test",
+                    _random.uniform(1000.0, 9999.0)
+                )
+                lista_incidentes.append(inc)
+
+            inicio = _time.perf_counter()
+            for inc in lista_incidentes:
+                pq.insertar(inc)
+            fin = _time.perf_counter()
+            tiempos_insercion.append(fin - inicio)
+
+            inicio = _time.perf_counter()
+            for _ in range(N):
+                pq.extraer_urgente()
+            fin = _time.perf_counter()
+            tiempos_extraccion.append(fin - inicio)
+
+        promedio_ins = sum(tiempos_insercion) / len(tiempos_insercion)
+        promedio_ext = sum(tiempos_extraccion) / len(tiempos_extraccion)
+
+        resultados.append({
+            "tamano": N,
+            "insercion_s": round(promedio_ins, 6),
+            "extraccion_s": round(promedio_ext, 6)
+        })
+
+    return {"heap_benchmarks": resultados}

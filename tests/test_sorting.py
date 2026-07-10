@@ -1,6 +1,6 @@
 import unittest
 from models.incident import Incident
-from structures.sorting import merge_sort, quick_sort
+from structures.sorting import merge_sort, quick_sort, zone_frequency_report
 
 class TestSorting(unittest.TestCase):
     """Pruebas unitarias para los algoritmos MergeSort y QuickSort."""
@@ -75,6 +75,39 @@ class TestSorting(unittest.TestCase):
         # Al ser estable, el resultado debe ser: (1, 'x'), (1, 'y'), (2, 'a'), (2, 'b')
         expected = [(1, 'x'), (1, 'y'), (2, 'a'), (2, 'b')]
         self.assertEqual(res, expected)
+
+    def test_zone_frequency_report(self):
+        """Verifica el reporte de frecuencia de incidentes por zona."""
+        incidentes = [
+            Incident("I-01", "Zona_A", 5.0, "Incendio", 100.0),
+            Incident("I-02", "Zona_B", 3.0, "Rescate", 101.0),
+            Incident("I-03", "Zona_A", 7.0, "Medico", 102.0),
+            Incident("I-04", "Zona_C", 2.0, "Incendio", 103.0),
+            Incident("I-05", "Zona_A", 4.0, "Rescate", 104.0),
+            Incident("I-06", "Zona_B", 6.0, "Medico", 105.0),
+        ]
+        reporte = zone_frequency_report(incidentes)
+
+        # Zona_A tiene 3, Zona_B tiene 2, Zona_C tiene 1
+        self.assertEqual(len(reporte), 3)
+        self.assertEqual(reporte[0], ("Zona_A", 3))
+        self.assertEqual(reporte[1], ("Zona_B", 2))
+        self.assertEqual(reporte[2], ("Zona_C", 1))
+
+    def test_zone_frequency_report_empty(self):
+        """Verifica que el reporte funcione con lista vacia."""
+        reporte = zone_frequency_report([])
+        self.assertEqual(reporte, [])
+
+    def test_zone_frequency_report_single_zone(self):
+        """Verifica que el reporte funcione cuando todos los incidentes estan en la misma zona."""
+        incidentes = [
+            Incident("I-01", "Zona_A", 5.0, "Incendio", 100.0),
+            Incident("I-02", "Zona_A", 3.0, "Rescate", 101.0),
+        ]
+        reporte = zone_frequency_report(incidentes)
+        self.assertEqual(len(reporte), 1)
+        self.assertEqual(reporte[0], ("Zona_A", 2))
 
 if __name__ == "__main__":
     unittest.main()

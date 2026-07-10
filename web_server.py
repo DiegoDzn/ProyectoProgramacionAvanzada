@@ -9,7 +9,8 @@ from models.center import EmergencyCenter
 from models.road_network import RoadNetwork
 from structures.hash_table import HashTable
 from structures.priority_queue import PriorityQueue
-from structures.sorting import merge_sort, quick_sort
+from structures.sorting import merge_sort, quick_sort, zone_frequency_report
+from structures.priority_queue import benchmark_priority_queue
 from structures.graph_search import bfs, dijkstra, a_star
 from data_generator import verificar_y_generar_datos
 
@@ -30,7 +31,8 @@ class DashboardRequestHandler(http.server.BaseHTTPRequestHandler):
             self.servir_simulacion()
         elif url == "/api/reportes":
             self.servir_reportes()
-        # 2. Servir archivos estáticos
+        elif url == "/api/zonas":
+            self.servir_zonas()
         elif url == "/" or url == "/index.html":
             self.servir_archivo_estatico("index.html", "text/html; charset=utf-8")
         elif url == "/index.css":
@@ -225,13 +227,44 @@ class DashboardRequestHandler(http.server.BaseHTTPRequestHandler):
                 "ubicacion": x.ubicacion,
                 "timestamp": x.timestamp
             } for x in antiguos_ordenados[:10]]
+
+            # 3. Reporte zonas con mas incidentes (MergeSort frecuencia desc)
+            zonas_frecuencia = zone_frequency_report(incidentes_lista)
+            top_zonas = [{"zona": z, "cantidad": c} for z, c in zonas_frecuencia[:15]]
+
+            # 4. Benchmarks de Heap (Priority Queue)
+            heap_benchmark_result = benchmark_priority_queue(tamanos=[100, 500, 1000], repeticiones=3)
             
             self.send_json_response({
                 "criticos": top_criticos,
-                "antiguos": top_antiguos
+                "antiguos": top_antiguos,
+                "zonas": top_zonas,
+                "heap_benchmarks": heap_benchmark_result["heap_benchmarks"]
             })
         except Exception as e:
             self.send_error(500, f"Error al procesar reportes: {str(e)}")
+
+    def servir_zonas(self):
+        verificar_y_generar_datos()
+        try:
+            incidentes_lista = []
+            with open("incidentes.csv", "r", encoding="utf-8") as f:
+                lineas = f.readlines()
+            for line in lineas[1:]:
+                parts = line.strip().split(",")
+                if len(parts) >= 5:
+                    inc_id = parts[0]
+                    zona = parts[1]
+                    prioridad = float(parts[2])
+                    tipo = parts[3]
+                    timestamp = float(parts[4])
+                    incidentes_lista.append(Incident(inc_id, zona, prioridad, tipo, timestamp))
+
+            zonas_frecuencia = zone_frequency_report(incidentes_lista)
+            top_zonas = [{"zona": z, "cantidad": c} for z, c in zonas_frecuencia[:20]]
+            self.send_json_response({"zonas": top_zonas})
+        except Exception as e:
+            self.send_error(500, f"Error al procesar zonas: {str(e)}")
 
     def send_json_response(self, data):
         try:
