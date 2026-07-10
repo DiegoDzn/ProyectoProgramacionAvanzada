@@ -12,8 +12,9 @@ Hemos establecido y validado todas las fases del sistema con los siguientes comp
 * **ADT EmergencyCenter:** Modelo para los centros de operaciones.
 * **ADT RoadNetwork:** Modelo de la red vial representado mediante un grafo ponderado con tiempos de desplazamiento y coordenadas espaciales `(x, y)` para guiar búsquedas informadas.
 * **HashTable Personalizada:** Estructura propia para almacenamiento de incidentes que maneja colisiones vía Separate Chaining, redimensionamiento dinámico cuando factor de carga > 0.75, y recolección de estadísticas de colisiones.
-* **PriorityQueue (Max-Heap y Min-Heap):** Cola de prioridad para la urgencia de incidentes en tiempo logarítmico (Max-Heap optimizado con mapa de posiciones) y cola de prioridad genérica de mínimos (Min-Heap) para búsquedas de caminos óptimos.
+* **PriorityQueue (Max-Heap y Min-Heap):** Cola de prioridad para la urgencia de incidentes en tiempo logarítmico (Max-Heap optimizado con mapa de posiciones) y cola de prioridad genérica de mínimos (Min-Heap) para búsquedas de caminos óptimos. Incluye benchmarks de inserción y extracción.
 * **Sorting (MergeSort y QuickSort):** Implementaciones genéricas de ordenación para generar reportes por antigüedad, severidad y frecuencia de incidentes por zona, evaluadas mediante benchmarking de rendimiento.
+* **Frecuencia por Zona:** Reporte de zonas con más incidentes ordenado por frecuencia descendente usando MergeSort.
 * **Graph Search (BFS, Dijkstra, A\*):** Algoritmos de búsqueda de caminos mínimos implementados desde cero. BFS encuentra el camino de menos tramos, mientras que Dijkstra y A* (asistido por heurística euclidiana) localizan la ruta más rápida.
 * **Escenario Integrado & Dataset Generator:** Simulación completa que genera un dataset de 500 incidentes y una red vial de 50 nodos y 121 aristas para realizar el despacho y ruta de vehículos en tiempo real.
 

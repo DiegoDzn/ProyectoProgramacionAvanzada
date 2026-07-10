@@ -7,7 +7,8 @@ from models.center import EmergencyCenter
 from models.road_network import RoadNetwork
 from structures.hash_table import HashTable
 from structures.priority_queue import PriorityQueue
-from structures.sorting import merge_sort, quick_sort
+from structures.sorting import merge_sort, quick_sort, zone_frequency_report
+from structures.priority_queue import benchmark_priority_queue
 from structures.graph_search import bfs, dijkstra, a_star
 import web_server
 
@@ -115,6 +116,13 @@ def ejecutar_demostracion_reportes():
     print("Reporte B: Incidentes mas criticos (QuickSort por prioridad - descendente):")
     for i, inc in enumerate(reporte_criticos, 1):
         print(f"  {i}. ID: {inc.id} | Tipo: {inc.tipo:<18} | Prioridad: {inc.prioridad:.2f}")
+    print()
+    
+    # Reporte C: Frecuencia por zona
+    reporte_zonas = zone_frequency_report(incidentes_activos)
+    print("Reporte C: Zonas con mas incidentes (MergeSort por frecuencia - descendente):")
+    for i, (zona, cant) in enumerate(reporte_zonas, 1):
+        print(f"  {i}. Zona: {zona:<15} | Incidentes: {cant}")
     print("=" * 70)
     print()
 
@@ -230,9 +238,21 @@ def ejecutar_fase_5_6_7():
 
 
 def ejecutar_analisis_experimental():
-    """Análisis Experimental de los Algoritmos (Ordenación y Grafos)."""
+    """Analisis Experimental de los Algoritmos (Heap, Ordenacion y Grafos)."""
     print("[STEP 4/4] ANALISIS EXPERIMENTAL DE ALGORITMOS (BENCHMARKS)")
     print("=" * 70)
+
+    # 0. Benchmarking de Heap (Priority Queue)
+    print("Benchmark: PriorityQueue Max-Heap (Insercion y Extraccion)")
+    print("-" * 75)
+    print(f"{'Tamano (N)':<12} | {'Insercion (s)':<18} | {'Extraccion (s)':<18}")
+    print("-" * 75)
+    
+    heap_results = benchmark_priority_queue(tamanos=[100, 500, 1000], repeticiones=3)
+    for r in heap_results["heap_benchmarks"]:
+        print(f"{r['tamano']:<12} | {r['insercion_s']:<18.6f} | {r['extraccion_s']:<18.6f}")
+    print("-" * 75)
+    print()
 
     # 1. Benchmarking de Ordenamiento
     print("Benchmark: Algoritmos de Ordenamiento (MergeSort vs QuickSort)")

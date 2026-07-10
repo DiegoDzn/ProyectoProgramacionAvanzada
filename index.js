@@ -350,6 +350,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     listAntiguos.appendChild(item);
                 });
 
+                // Llenar zonas con mas incidentes
+                const listZonas = document.getElementById('list-zonas');
+                listZonas.innerHTML = '';
+                if (data.zonas) {
+                    data.zonas.forEach((z, idx) => {
+                        const item = document.createElement('div');
+                        item.className = 'report-item';
+                        const maxCant = data.zonas[0].cantidad;
+                        const pct = maxCant > 0 ? (z.cantidad / maxCant * 100) : 0;
+                        item.innerHTML = `
+                            <div class="header">
+                                <span>${idx + 1}. ${z.zona}</span>
+                                <span style="color:var(--accent-primary)">${z.cantidad} incidentes</span>
+                            </div>
+                            <div class="chart-bar-wrapper" style="margin-top:4px">
+                                <div class="chart-bar" style="width: ${pct}%; background: ${idx < 3 ? 'var(--danger-color)' : 'var(--accent-primary)'}"></div>
+                            </div>
+                        `;
+                        listZonas.appendChild(item);
+                    });
+                }
+
+                // Llenar tabla de heap benchmarks
+                const heapBody = document.getElementById('heap-benchmarks-body');
+                heapBody.innerHTML = '';
+                if (data.heap_benchmarks) {
+                    data.heap_benchmarks.forEach(row => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td><strong>${row.tamano}</strong></td>
+                            <td>${row.insercion_s.toFixed(6)}</td>
+                            <td>${row.extraccion_s.toFixed(6)}</td>
+                        `;
+                        heapBody.appendChild(tr);
+                    });
+                }
+
                 appendLog('[SYSTEM] Reportes analíticos generados con éxito.', 'success');
             })
             .catch(err => {

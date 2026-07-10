@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emergency Dispatch & Routing Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=3">
+    <link rel="stylesheet" href="index.css?v=4">
 </head>
 <body>
     <div class="dashboard-container">
@@ -33,6 +33,7 @@
                 <div class="tab-controls">
                     <button class="tab-btn active" data-tab="tab-criticos">Criticos</button>
                     <button class="tab-btn" data-tab="tab-antiguos">Antiguos</button>
+                    <button class="tab-btn" data-tab="tab-zonas">Zonas</button>
                 </div>
                 <div class="tab-content active" id="tab-criticos">
                     <div id="list-criticos" class="report-list">
@@ -41,6 +42,11 @@
                 </div>
                 <div class="tab-content" id="tab-antiguos">
                     <div id="list-antiguos" class="report-list">
+                        <p class="empty-text">Presione "Generar Reportes" para ver datos.</p>
+                    </div>
+                </div>
+                <div class="tab-content" id="tab-zonas">
+                    <div id="list-zonas" class="report-list">
                         <p class="empty-text">Presione "Generar Reportes" para ver datos.</p>
                     </div>
                 </div>
@@ -121,10 +127,30 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="benchmarks-sorting">
+                    <h4>Benchmarks de Heap / Priority Queue</h4>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>N</th>
+                                    <th>Insercion (s)</th>
+                                    <th>Extraccion (s)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="heap-benchmarks-body">
+                                <tr>
+                                    <td colspan="3" class="empty-table-text">Esperando reportes...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </aside>
     </div>
     
-    <script src="index.js?v=3"></script>
+    <script src="index.js?v=4"></script>
 </body>
 </html>
